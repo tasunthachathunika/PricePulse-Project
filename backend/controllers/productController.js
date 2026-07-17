@@ -79,3 +79,13 @@ exports.getPopularProducts = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch popular items" });
     }
 };
+
+exports.getAllTrackedItems = async (req, res) => {
+    try {
+        const products = await Product.find().populate('user', 'name email').sort({ lastChecked: -1 });
+        res.json(products);
+    } catch (error) {
+        console.error("Get All Tracked Items Error:", error);
+        res.status(500).json({ error: "Failed to fetch all tracked items" });
+    }
+};

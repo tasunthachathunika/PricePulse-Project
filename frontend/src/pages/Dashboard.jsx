@@ -17,7 +17,7 @@ import {
 import {
     FaChartLine, FaPlus, FaTrash, FaSearch,
     FaArrowUp, FaBell, FaBoxOpen, FaUserCircle, FaBolt,
-    FaWallet, FaArrowRight, FaPaperPlane, FaSignOutAlt, FaFire
+    FaWallet, FaArrowRight, FaPaperPlane, FaSignOutAlt, FaFire, FaCheck
 } from "react-icons/fa";
 import logo from "../assets/logo.png";
 
@@ -38,6 +38,33 @@ const Dashboard = () => {
 
     const userEmail = localStorage.getItem("userEmail");
     const userName = localStorage.getItem("userName");
+
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+
+    const fetchNotifications = useCallback(async () => {
+        if (!userEmail) return;
+        try {
+            const res = await axios.get(`http://localhost:5000/api/notifications?userEmail=${userEmail}`);
+            setNotifications(res.data);
+        } catch (error) {
+            console.error("Failed to load notifications", error);
+        }
+    }, [userEmail]);
+
+    const markAsRead = async (id) => {
+        try {
+            await axios.put(`http://localhost:5000/api/notifications/${id}/read`);
+            setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
+        } catch (error) {
+            console.error("Failed to mark as read", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+    }, [fetchNotifications]);
+
 
     // --- API FUNCTIONS ---
 
@@ -149,6 +176,42 @@ const Dashboard = () => {
                             <FaFire className="text-orange-500 group-hover/btn:animate-bounce" />
                             Popular Products
                         </Link>
+
+                        
+                        <div className="relative">
+                            <button onClick={() => setShowNotifications(!showNotifications)} className="text-white relative p-2 bg-white/20 rounded-full hover:bg-white/30 transition border border-white/20 shadow-md">
+                                <FaBell className="text-lg" />
+                                {notifications.filter(n => !n.isRead).length > 0 && (
+                                    <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 border-2 border-orange-500 rounded-full animate-bounce"></span>
+                                )}
+                            </button>
+
+                            {/* Dropdown */}
+                            {showNotifications && (
+                                <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 transform origin-top-right transition-all">
+                                    <div className="bg-slate-50 p-4 border-b border-slate-100 flex justify-between items-center">
+                                        <h3 className="font-bold text-slate-800">Notifications</h3>
+                                        <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full font-bold">{notifications.filter(n => !n.isRead).length} New</span>
+                                    </div>
+                                    <div className="max-h-64 overflow-y-auto">
+                                        {notifications.length === 0 ? (
+                                            <p className="p-6 text-center text-sm text-slate-400 font-medium">No notifications yet.</p>
+                                        ) : (
+                                            notifications.map((n) => (
+                                                <div key={n._id} onClick={() => !n.isRead && markAsRead(n._id)} className={`p-4 border-b border-slate-50 cursor-pointer transition-colors ${!n.isRead ? 'bg-orange-50/50 hover:bg-orange-50' : 'bg-white hover:bg-slate-50'}`}>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <h4 className={`text-sm font-bold ${!n.isRead ? 'text-slate-800' : 'text-slate-600'}`}>{n.title}</h4>
+                                                        {n.isRead && <FaCheck className="text-green-500 text-xs" />}
+                                                    </div>
+                                                    <p className="text-xs text-slate-500">{n.message}</p>
+                                                    <p className="text-[10px] text-slate-400 mt-2 font-bold">{new Date(n.createdAt).toLocaleDateString()}</p>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         <div className="flex items-center gap-4 pl-6 border-l border-white/20">
                             <div className="text-right hidden md:block leading-tight">

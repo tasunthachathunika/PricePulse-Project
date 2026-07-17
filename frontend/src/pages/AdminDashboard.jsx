@@ -6,6 +6,7 @@ import {
     FaShoppingBag, FaChartLine, FaSignOutAlt, FaBolt, FaCrown, FaMagic, FaTimes, FaFileDownload
 } from "react-icons/fa";
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FaEdit, FaBell, FaGlobe } from "react-icons/fa";
 import logo from "../assets/logo.png";
 // PDF Libraries
 import jsPDF from "jspdf";
@@ -68,6 +69,51 @@ const AdminDashboard = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedUserItems, setSelectedUserItems] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [editingUser, setEditingUser] = useState(null);
+    const [globalItems, setGlobalItems] = useState([]);
+    const [activeTab, setActiveTab] = useState("users");
+    const [notificationData, setNotificationData] = useState({ userId: "", title: "", message: "", show: false });
+
+    const fetchGlobalItems = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.get("http://localhost:5000/api/products/all");
+            setGlobalItems(res.data);
+            setActiveTab("global");
+        } catch (error) {
+            console.error("Error fetching global items:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateUserSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put(`http://localhost:5000/api/auth/user/${editingUser._id}`, editingUser);
+            alert("User updated successfully");
+            setEditingUser(null);
+            fetchUsersData();
+        } catch (error) {
+            alert("Failed to update user");
+        }
+    };
+
+    const handleSendNotification = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post("http://localhost:5000/api/notifications", {
+                userId: notificationData.userId || null,
+                title: notificationData.title,
+                message: notificationData.message
+            });
+            alert("Notification sent successfully!");
+            setNotificationData({ userId: "", title: "", message: "", show: false });
+        } catch (error) {
+            alert("Failed to send notification");
+        }
+    };
+
 
     // --- STATS CALCULATION (Moved up for PDF access) ---
     const totalUsers = users.length;
@@ -363,12 +409,40 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* --- CONTENT SECTION --- */}
+                
+                    <div className="flex gap-4 mb-4">
+                        <button onClick={() => {setActiveTab('users'); fetchUsersData();}} className={`px-4 py-2 rounded-xl font-bold transition-all ${activeTab === 'users' ? 'bg-orange-500 text-white shadow-md' : 'bg-white/80 text-slate-600 hover:bg-orange-100'}`}>Users</button>
+                        <button onClick={fetchGlobalItems} className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 ${activeTab === 'global' ? 'bg-emerald-500 text-white shadow-md' : 'bg-white/80 text-slate-600 hover:bg-emerald-100'}`}><FaGlobe/> All Tracked Items</button>
+                        <button onClick={() => setNotificationData({ ...notificationData, show: true })} className="px-4 py-2 rounded-xl font-bold transition-all bg-blue-500 text-white shadow-md hover:bg-blue-600 flex items-center gap-2"><FaBell/> Broadcast Notification</button>
+                    </div>
+
                 <div className="space-y-4">
                     <h2 className="text-lg font-bold text-slate-800 pl-1 flex items-center gap-2">
                         <FaUserShield className="text-slate-400" /> Recent Members
                     </h2>
 
-                    {loading ? (
+                    {activeTab === 'global' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {globalItems.map((item, index) => (
+                                <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                    <div className="flex items-center gap-4 mb-3">
+                                        <img src={item.image || item.img || "https://via.placeholder.com/150"} className="w-16 h-16 object-contain mix-blend-multiply" alt=""/>
+                                        <div>
+                                            <h3 className="font-bold text-sm text-slate-800 line-clamp-2">{item.title || item.name}</h3>
+                                            <span className="text-xs bg-slate-100 px-2 py-1 rounded text-slate-600 font-bold uppercase">{item.site}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-center border-t border-slate-100 pt-3">
+                                        <span className="font-black text-emerald-600 text-lg">Rs. {item.currentPrice?.toLocaleString()}</span>
+                                        <div className="text-right">
+                                            <p className="text-[10px] text-slate-400">Tracked By</p>
+                                            <p className="text-xs font-bold text-slate-700">{item.user?.name || "Unknown"}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : loading ? (
                         <div className="flex flex-col items-center justify-center py-24 bg-white/40 rounded-3xl border border-white/60">
                             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
                             <p className="text-sm font-bold text-slate-500 mt-4">Loading data...</p>
@@ -425,6 +499,14 @@ const AdminDashboard = () => {
                                                 <FaTrash />
                                             </button>
                                         )}
+
+                                        <button onClick={() => setNotificationData({ userId: user._id, title: "", message: "", show: true })} className="p-2.5 rounded-xl text-yellow-500 hover:bg-yellow-50 hover:scale-105 transition-all bg-white border border-slate-100 shadow-sm" title="Send Notification">
+                                            <FaBell />
+                                        </button>
+                                        <button onClick={() => setEditingUser(user)} className="p-2.5 rounded-xl text-green-500 hover:bg-green-50 hover:scale-105 transition-all bg-white border border-slate-100 shadow-sm" title="Edit User">
+                                            <FaEdit />
+                                        </button>
+
                                     </div>
                                 </div>
                             ))}
@@ -493,6 +575,60 @@ const AdminDashboard = () => {
                                 Close View
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+
+            {/* --- EDIT USER MODAL --- */}
+            {editingUser && (
+                <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[100] backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-6">
+                        <h2 className="text-xl font-bold mb-4">Edit User</h2>
+                        <form onSubmit={handleUpdateUserSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700">Name</label>
+                                <input type="text" className="w-full border border-slate-200 rounded-lg p-2" value={editingUser.name || ""} onChange={(e) => setEditingUser({...editingUser, name: e.target.value})} required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700">Email</label>
+                                <input type="email" className="w-full border border-slate-200 rounded-lg p-2" value={editingUser.email || ""} onChange={(e) => setEditingUser({...editingUser, email: e.target.value})} required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700">Role</label>
+                                <select className="w-full border border-slate-200 rounded-lg p-2" value={editingUser.role || "user"} onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}>
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-2 justify-end mt-4">
+                                <button type="button" onClick={() => setEditingUser(null)} className="px-4 py-2 bg-slate-100 rounded-lg font-bold">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* --- NOTIFICATION MODAL --- */}
+            {notificationData.show && (
+                <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[100] backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-6">
+                        <h2 className="text-xl font-bold mb-4">{notificationData.userId ? "Send Notification to User" : "Broadcast Notification"}</h2>
+                        <form onSubmit={handleSendNotification} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700">Title</label>
+                                <input type="text" className="w-full border border-slate-200 rounded-lg p-2" value={notificationData.title} onChange={(e) => setNotificationData({...notificationData, title: e.target.value})} required />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700">Message</label>
+                                <textarea className="w-full border border-slate-200 rounded-lg p-2 h-24" value={notificationData.message} onChange={(e) => setNotificationData({...notificationData, message: e.target.value})} required></textarea>
+                            </div>
+                            <div className="flex gap-2 justify-end mt-4">
+                                <button type="button" onClick={() => setNotificationData({ userId: "", title: "", message: "", show: false })} className="px-4 py-2 bg-slate-100 rounded-lg font-bold">Cancel</button>
+                                <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-lg font-bold hover:bg-blue-600">Send</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

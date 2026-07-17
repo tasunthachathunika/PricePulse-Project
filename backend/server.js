@@ -17,9 +17,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // --- ROUTES SECTION ---
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Test Route for Email
 app.get('/test-email', async (req, res) => {

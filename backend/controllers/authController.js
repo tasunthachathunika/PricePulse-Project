@@ -231,4 +231,28 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, googleAuth, forgotPassword, resetPassword, getAdminStats, getAllUsers, getUsersWithData, deleteUser };
+// --- 10. UPDATE USER (ADMIN ONLY) ---
+const updateUser = async (req, res) => {
+    const { name, email, role } = req.body;
+    try {
+        const user = await User.findById(req.params.id);
+        if (user) {
+            user.name = name || user.name;
+            user.email = email || user.email;
+            user.role = role || user.role;
+            const updatedUser = await user.save();
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                role: updatedUser.role
+            });
+        } else {
+            res.status(404).json({ message: "User not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error updating user" });
+    }
+};
+
+module.exports = { registerUser, loginUser, googleAuth, forgotPassword, resetPassword, getAdminStats, getAllUsers, getUsersWithData, deleteUser, updateUser };

@@ -11,4 +11,7 @@ router.delete('/:id', productController.deleteProduct);
 // --- ALUTH ROUTE EKA (MEKA ADD KARANNA) ---
 router.get('/popular', productController.getPopularProducts);
 
+// GET ALL TRACKED ITEMS (ADMIN ONLY)
+router.get('/all', productController.getAllTrackedItems);
+
 module.exports = router;

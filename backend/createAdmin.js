@@ -10,7 +10,7 @@ const createAdmin = async () => {
         await mongoose.connect(process.env.MONGO_URI); // DB Connect වෙනවා
 
         // කලින් Admin කෙනෙක් ඉන්නවද බලනවා (Duplicate නොවෙන්න)
-        const adminExists = await User.findOne({ email: "admin@pricepulse.com" });
+        const adminExists = await User.findOne({ email: "admin@gmail.com" });
 
         if (adminExists) {
             console.log("⚠️ Admin User Already Exists!");
@@ -24,13 +24,13 @@ const createAdmin = async () => {
         // Admin ව හදනවා
         const adminUser = await User.create({
             name: "Super Admin",
-            email: "admin@pricepulse.com",
+            email: "admin@gmail.com",
             password: hashedPassword,
             role: "admin", // 👈 මෙන්න මේකයි වැදගත්ම කෑල්ල
             fromGoogle: false
         });
 
-        console.log("✅ Admin Created: admin@pricepulse.com / admin123");
+        console.log("✅ Admin Created: admin@gmail.com / admin123");
         process.exit();
 
     } catch (error) {
