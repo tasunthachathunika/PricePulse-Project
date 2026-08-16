@@ -6,10 +6,7 @@ export default {
     ],
     theme: {
         extend: {
-            animation: {
-                blob: "blob 7s infinite",
-                "fade-in": "fadeIn 0.5s ease-out forwards",
-            },
+
             keyframes: {
                 blob: {
                     "0%": { transform: "translate(0px, 0px) scale(1)" },
