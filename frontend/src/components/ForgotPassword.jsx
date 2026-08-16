@@ -17,7 +17,8 @@ const ForgotPassword = () => {
 
         try {
             // Backend API call
-            const res = await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email });
             setMessage("Check your email! Password reset link sent.");
         } catch (err) {
             setError(err.response?.data?.error || "Failed to send email. Please try again.");

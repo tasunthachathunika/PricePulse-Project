@@ -77,7 +77,8 @@ const AdminDashboard = () => {
     const fetchGlobalItems = async () => {
         try {
             setLoading(true);
-            const res = await axios.get("http://localhost:5000/api/products/all");
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const res = await axios.get(`${API_URL}/api/products/all`);
             setGlobalItems(res.data);
             setActiveTab("global");
         } catch (error) {
@@ -90,7 +91,8 @@ const AdminDashboard = () => {
     const handleUpdateUserSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`http://localhost:5000/api/auth/user/${editingUser._id}`, editingUser);
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            await axios.put(`${API_URL}/api/auth/user/${editingUser._id}`, editingUser);
             alert("User updated successfully");
             setEditingUser(null);
             fetchUsersData();
@@ -102,7 +104,8 @@ const AdminDashboard = () => {
     const handleSendNotification = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("http://localhost:5000/api/notifications", {
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            await axios.post(`${API_URL}/api/notifications`, {
                 userId: notificationData.userId || null,
                 title: notificationData.title,
                 message: notificationData.message
@@ -134,7 +137,8 @@ const AdminDashboard = () => {
     const fetchUsersData = async () => {
         try {
             setLoading(true);
-            const res = await axios.get("http://localhost:5000/api/auth/users-with-data");
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const res = await axios.get(`${API_URL}/api/auth/users-with-data`);
             setUsers(res.data);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -260,7 +264,8 @@ const AdminDashboard = () => {
     const deleteUser = async (id) => {
         if (window.confirm("Are you sure you want to remove this user? This action cannot be undone.")) {
             try {
-                await axios.delete(`http://localhost:5000/api/auth/user/${id}`);
+                const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+                await axios.delete(`${API_URL}/api/auth/user/${id}`);
                 setUsers(users.filter((user) => user._id !== id));
                 alert("User deleted successfully.");
             } catch (error) {
@@ -273,7 +278,8 @@ const AdminDashboard = () => {
     const handleDeleteItem = async (itemId) => {
         if (window.confirm("Are you sure you want to delete this item?")) {
             try {
-                await axios.delete(`http://localhost:5000/api/products/${itemId}`);
+                const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+                await axios.delete(`${API_URL}/api/products/${itemId}`);
                 const updatedItems = selectedUserItems.trackedItems.filter(item => item._id !== itemId);
                 setSelectedUserItems({ ...selectedUserItems, trackedItems: updatedItems });
                 fetchUsersData();
@@ -289,7 +295,8 @@ const AdminDashboard = () => {
         const newPrice = prompt("Enter new price:", item.price || item.currentPrice);
         if (newPrice && newPrice !== item.price) {
             try {
-                await axios.put(`http://localhost:5000/api/products/${item._id}`, { price: newPrice });
+                const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+                await axios.put(`${API_URL}/api/products/${item._id}`, { price: newPrice });
                 const updatedItems = selectedUserItems.trackedItems.map(i =>
                     i._id === item._id ? { ...i, price: newPrice, currentPrice: newPrice } : i
                 );

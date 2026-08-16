@@ -45,7 +45,8 @@ const Dashboard = () => {
     const fetchNotifications = useCallback(async () => {
         if (!userEmail) return;
         try {
-            const res = await axios.get(`http://localhost:5000/api/notifications?userEmail=${userEmail}`);
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const res = await axios.get(`${API_URL}/api/notifications?userEmail=${userEmail}`);
             setNotifications(res.data);
         } catch (error) {
             console.error("Failed to load notifications", error);
@@ -54,7 +55,8 @@ const Dashboard = () => {
 
     const markAsRead = async (id) => {
         try {
-            await axios.put(`http://localhost:5000/api/notifications/${id}/read`);
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            await axios.put(`${API_URL}/api/notifications/${id}/read`);
             setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
         } catch (error) {
             console.error("Failed to mark as read", error);
@@ -72,7 +74,8 @@ const Dashboard = () => {
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:5000/api/products?userEmail=${userEmail}`);
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const res = await axios.get(`${API_URL}/api/products?userEmail=${userEmail}`);
             setProducts(res.data);
         } catch (error) {
             console.error("Failed to load products", error);
@@ -97,7 +100,8 @@ const Dashboard = () => {
 
         setAdding(true);
         try {
-            const response = await axios.post("http://localhost:5000/api/products", {
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const response = await axios.post(`${API_URL}/api/products`, {
                 url: newUrl,
                 userEmail: userEmail,
             });
@@ -124,7 +128,8 @@ const Dashboard = () => {
     const handleDelete = async (id, title) => {
         if (!confirm(`Stop tracking "${title}"?`)) return;
         try {
-            await axios.delete(`http://localhost:5000/api/products/${id}`);
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            await axios.delete(`${API_URL}/api/products/${id}`);
             // UI එකෙන් අයින් කරනවා (Reload නොකර)
             setProducts(products.filter((p) => p._id !== id));
         } catch (error) {

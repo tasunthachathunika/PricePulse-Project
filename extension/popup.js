@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:5000/api";
+// Live backend URL
+const API_URL = "https://pricepulse-project-production.up.railway.app/api";
 
 // DOM
 const views = { login: document.getElementById("login-view"), dashboard: document.getElementById("dashboard-view") };

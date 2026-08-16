@@ -108,7 +108,8 @@ const Popular = () => {
     useEffect(() => {
         const fetchPopular = async () => {
             try {
-                const res = await axios.get("http://localhost:5000/api/products/popular");
+                const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+                const res = await axios.get(`${API_URL}/api/products/popular`);
                 if (res.data.length > 0) {
                     setProducts(res.data);
                 } else {

@@ -41,7 +41,8 @@ const Login = () => {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
 
-            const res = await axios.post("http://localhost:5000/api/auth/google", {
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const res = await axios.post(`${API_URL}/api/auth/google`, {
                 name: user.displayName, email: user.email, img: user.photoURL
             });
 
@@ -67,7 +68,8 @@ const Login = () => {
     const handleManualLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/login", {
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            const res = await axios.post(`${API_URL}/api/auth/login`, {
                 email: e.target.email.value, password: e.target.password.value
             });
 

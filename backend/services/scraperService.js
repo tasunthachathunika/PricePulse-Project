@@ -1,20 +1,20 @@
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 const scrapeProduct = async (url) => {
     let browser;
     try {
-        // 1. Chrome Path (Windows)
-        let executablePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-        if (!fs.existsSync(executablePath)) {
-            executablePath = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe';
-        }
-
-        browser = await puppeteer.launch({
-            executablePath: executablePath,
+        const options = {
             headless: "new",
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--window-size=1920,1080']
-        });
+        };
+
+        // For cloud environments like Render, use the provided chromium path if it exists
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+            options.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        }
+
+        browser = await puppeteer.launch(options);
 
         const page = await browser.newPage();
 
